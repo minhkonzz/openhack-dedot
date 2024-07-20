@@ -1,28 +1,42 @@
-import dedotLogo from './assets/dedot-dark-logo.png';
-import { Container, Flex, Heading } from '@chakra-ui/react';
+import { useState, useEffect } from "react";
+import { DedotClient, WsProvider } from "dedot";
+import { Injected, InjectedAccount } from '@polkadot/extension-inject/types';
+import { WestendApi } from "@dedot/chaintypes";
+import { WESTEND } from "./networks";
+import { Flex, Spinner } from "@chakra-ui/react"
+import ConnectWalletButton from "./components/connect-wallet-button";
+import EventHeading from "./components/event-heading";
+import MainInterface from "./components/main-interface";
 
-function App() {
-  // 1. Connect to SubWallet
-  // 2. Show connected account (name & address)
-  // 3. Initialize `DedotClient` to connect to the network (Westend testnet)
-  // 4. Fetch & show balance for connected account
-  // 5. Build a form to transfer balance (destination address & amount to transfer)
-  // 6. Check transaction status (in-block & finalized)
-  // 7. Check transaction result (success or not)
-  // 8. Subscribe to balance changing
+export default function Result() {
 
-  return (
-    <Container maxW='container.md' my={16}>
-      <Flex justifyContent='center'>
-        <a href='https://dedot.dev' target='_blank'>
-          <img width='100' src={dedotLogo} className='logo' alt='Vite logo' />
-        </a>
+   const [client, setClient] = useState<DedotClient<WestendApi>>();
+   const [injected, setInjected] = useState<Injected>();
+   const [account, setAccount] = useState<InjectedAccount>();
+   
+   useEffect(() => {
+      (async() => {
+         const client = await (new DedotClient<WestendApi>(new WsProvider(WESTEND.endpoint))).connect();
+         setClient(client);
+      })();
+
+      return () => {
+         (async() => { await client?.disconnect() })();
+      }
+   }, []);
+
+   const isClientConnected = client && client.status === "connected"
+   const isConnectedAccount = isClientConnected && injected && !!account?.address;
+
+   return (
+      <Flex minW="100vw" minH="100vh" justifyContent="center" alignItems="center"> {
+         isClientConnected && 
+         <>
+            <EventHeading />
+            { isConnectedAccount && <MainInterface {...{client, account, injected}} /> || <ConnectWalletButton {...{setAccount, setInjected}} /> }
+         </> || 
+         <Spinner color="gray" size="xl" />
+      }   
       </Flex>
-      <Heading my={4} textAlign='center'>
-        Open Hack Dedot
-      </Heading>
-    </Container>
-  );
+   );
 }
-
-export default App;
