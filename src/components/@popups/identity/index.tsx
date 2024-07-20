@@ -80,36 +80,15 @@ export default function IdentityModal({
          github:  { type: "None" }
       }
 
-      await client!.tx.identity
+      // not see docs for this
+      const trans = await client!.tx.identity
          .setIdentity(info)
-         .signAndSend(account.address, { signer: injected.signer }, (result) => {
-            const status: string = result.status.type;
-            if (status === "BestChainBlockIncluded" || status === "Finalized") {
-               if (result.dispatchError) {
-                  toast({
-                     position: "top",
-                     title: "Transaction failed",
-                     status: "error",
-                     colorScheme: "#ff7777",
-                     duration: 7000,
-                     isClosable: true
-                  });
-                  console.error(result.dispatchError);
-                  return;
-               }
-               if (status === "Finalized") {
-                  toast({
-                     position: "top",
-                     title: "Transaction success",
-                     status: "success",
-                     colorScheme: "#88d66c",
-                     duration: 7000,
-                     isClosable: true
-                  })
-                  onModalClose();  
-               }
-            }
-         })
+         .sign(account.address, { signer: injected.signer })
+
+      console.log(trans);
+      setConfirming(false);
+      
+      onModalClose();
    }
 
    return (
@@ -146,7 +125,7 @@ export default function IdentityModal({
                minH={30} 
                isLoading={confirming}
                loadingText="Waiting for confirmation..." 
-               isDisabled={!isAlreadySetIdentity || confirming}
+               isDisabled={confirming}
                spinnerPlacement="end"
                onClick={setIdentity}>
                Set identity

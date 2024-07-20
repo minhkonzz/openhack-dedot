@@ -82,7 +82,7 @@ export default function MainInterface({ client, account, injected }: Props) {
                minW={500}
                minH={50} 
                maxW="100%" 
-               onClick={() => openModal("identity", {account, onModalClose})}>
+               onClick={() => openModal("identity", {account, injected, onModalClose})}>
                On-chain identity
             </Button>
          </Stack>

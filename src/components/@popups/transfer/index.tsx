@@ -71,6 +71,7 @@ export default function TransferModal({
                   return;
                }
                if (statusType === "Finalized") {
+                  console.log(result);
                   toast({
                      position: "top",
                      title: "Transfer success",
